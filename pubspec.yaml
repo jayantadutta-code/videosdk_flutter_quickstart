@@ -52,8 +52,8 @@ flutter_native_splash:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/laicon.png"
-  adaptive_icon_foreground: "assets/images/laicon.png"
+  image_path: "assets/images/spicon.png"
+  adaptive_icon_foreground: "assets/images/spicon.png"
   adaptive_icon_background: "#ffffff"
   flutter_test:
     sdk: flutter
