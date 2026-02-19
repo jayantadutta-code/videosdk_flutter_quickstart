@@ -43,12 +43,12 @@ flutter_native_splash:
   android: true
   ios: true
   color: "#ffffff"
-  image: "assets/images/spicon.png"
-  branding: "assets/images/nestb.png"
+  image: "assets/images/licon.png"
+  branding: "assets/images/nestbr.png"
   android_12:
     color: "#ffffff"
-    image: "assets/images/spicon.png"
-    branding: "assets/images/nestb.png"
+    image: "assets/images/licon.png"
+    branding: "assets/images/nestbr.png"
 flutter_launcher_icons:
   android: true
   ios: true
