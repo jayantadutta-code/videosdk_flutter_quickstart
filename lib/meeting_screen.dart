@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:videosdk/videosdk.dart';
 import './participant_tile.dart';
 import 'meeting_controls.dart';
@@ -24,7 +25,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
 
   @override
   void initState() {
-// create room
+    // create room
     _room = VideoSDK.createRoom(
         roomId: widget.meetingId,
         token: widget.token,
@@ -38,7 +39,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
 
     setMeetingEventListener();
 
-// Join room
+    // Join room
     _room.join();
 
     super.initState();
@@ -51,7 +52,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
     }
   }
 
-// listening to meeting events
+  // listening to meeting events
   void setMeetingEventListener() {
     _room.on(Events.roomJoined, () {
       setState(() {
@@ -89,6 +90,41 @@ class _MeetingScreenState extends State<MeetingScreen> {
     return true;
   }
 
+  // Method to copy meeting ID to clipboard
+  Future<void> _copyMeetingIdToClipboard() async {
+    await Clipboard.setData(ClipboardData(text: widget.meetingId));
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.check_circle,
+              color: Colors.green.shade400,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                'Meeting ID copied to clipboard',
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.grey.shade900,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 2),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
 // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -96,23 +132,145 @@ class _MeetingScreenState extends State<MeetingScreen> {
       onWillPop: () => _onWillPop(),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('VideoSDK QuickStart'),
+          title: const Text(
+            'Nest',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          centerTitle: true,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          foregroundColor: Theme.of(context).primaryColor,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1),
+            child: Container(
+              color: Colors.grey.shade200,
+              height: 1,
+            ),
+          ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white,
+                Colors.grey.shade50,
+              ],
+            ),
+          ),
           child: Column(
             children: [
-              Text(widget.meetingId),
-//render all participant
+              // Meeting ID Card with Copy Button
+              Container(
+                margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.meeting_room,
+                      size: 18,
+                      color: Colors.blue.shade700,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Meeting ID',
+                            style: TextStyle(
+                              color: Colors.blue.shade700,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            widget.meetingId,
+                            style: TextStyle(
+                              color: Colors.blue.shade700,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Copy Button
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.blue.shade200),
+                      ),
+                      child: InkWell(
+                        onTap: _copyMeetingIdToClipboard,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.copy,
+                                size: 16,
+                                color: Colors.blue.shade700,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Copy',
+                                style: TextStyle(
+                                  color: Colors.blue.shade700,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Participants Grid
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: GridView.builder(
+                  child: participants.isEmpty
+                      ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Waiting for participants to join...',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                      : GridView.builder(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
-                      mainAxisExtent: 300,
+                      mainAxisExtent: 280,
                     ),
                     itemBuilder: (context, index) {
                       return ParticipantTile(
@@ -123,18 +281,105 @@ class _MeetingScreenState extends State<MeetingScreen> {
                   ),
                 ),
               ),
-              MeetingControls(
-                onToggleMicButtonPressed: () {
-                  micEnabled ? _room.muteMic() : _room.unmuteMic();
-                  micEnabled = !micEnabled;
-                },
-                onToggleCameraButtonPressed: () {
-                  camEnabled ? _room.disableCam() : _room.enableCam();
-                  camEnabled = !camEnabled;
-                },
-                onLeaveButtonPressed: () {
-                  _room.leave();
-                },
+
+              // Elevated Controls Section
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      spreadRadius: 2,
+                      blurRadius: 10,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Participant count indicator
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.people,
+                                    size: 16,
+                                    color: Colors.grey.shade700,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '${participants.length} participant${participants.length != 1 ? 's' : ''}',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade700,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Meeting Controls with elevation - FIXED WITH setState()
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              spreadRadius: 1,
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: MeetingControls(
+                          onToggleMicButtonPressed: () {
+                            setState(() {
+                              if (micEnabled) {
+                                _room.muteMic();
+                              } else {
+                                _room.unmuteMic();
+                              }
+                              micEnabled = !micEnabled;
+                            });
+                          },
+                          onToggleCameraButtonPressed: () {
+                            setState(() {
+                              if (camEnabled) {
+                                _room.disableCam();
+                              } else {
+                                _room.enableCam();
+                              }
+                              camEnabled = !camEnabled;
+                            });
+                          },
+                          onLeaveButtonPressed: () {
+                            _room.leave();
+                          },
+                          micEnabled: micEnabled,
+                          camEnabled: camEnabled,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
