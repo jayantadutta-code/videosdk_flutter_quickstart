@@ -56,14 +56,14 @@
     
     📸 Screenshots
     
-    <div>
-    <img src="assets/images/1.jpeg" alt="screenshot" width="200" />
-    <img src="assets/images/2.jpeg" alt="screenshot" width="200" />
-    <img src="assets/images/3.jpeg" alt="screenshot" width="200" />
-    <img src="assets/images/4.jpeg" alt="screenshot" width="200" />
-    <img src="assets/images/5.jpeg" alt="screenshot" width="200" />
+<div>
+<img src="assets/images/1.jpeg" alt="screenshot" width="200" />
+<img src="assets/images/2.jpeg" alt="screenshot" width="200" />
+<img src="assets/images/3.jpeg" alt="screenshot" width="200" />
+<img src="assets/images/4.jpeg" alt="screenshot" width="200" />
+<img src="assets/images/5.jpeg" alt="screenshot" width="200" />
     
-    </div>
+</div>
     
     📌 Package Used
     
