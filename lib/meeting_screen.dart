@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:videosdk/videosdk.dart';
 import './participant_tile.dart';
 import 'meeting_controls.dart';
+import 'join_screen.dart'; // <-- Add this import
 
 class MeetingScreen extends StatefulWidget {
   final String meetingId;
@@ -80,7 +81,11 @@ class _MeetingScreenState extends State<MeetingScreen> {
 
     _room.on(Events.roomLeft, () {
       participants.clear();
-      Navigator.popUntil(context, ModalRoute.withName('/'));
+      // Navigate to JoinScreen and remove all previous routes
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => JoinScreen()),
+            (route) => false,
+      );
     });
   }
 
@@ -128,6 +133,9 @@ class _MeetingScreenState extends State<MeetingScreen> {
 // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    // Get bottom padding to adjust controls
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
     return WillPopScope(
       onWillPop: () => _onWillPop(),
       child: Scaffold(
@@ -148,208 +156,197 @@ class _MeetingScreenState extends State<MeetingScreen> {
             ),
           ),
         ),
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.white,
-                Colors.grey.shade50,
-              ],
+        body: SafeArea( // <-- Wrap with SafeArea
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.white,
+                  Colors.grey.shade50,
+                ],
+              ),
             ),
-          ),
-          child: Column(
-            children: [
-              // Meeting ID Card with Copy Button
-              Container(
-                margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.meeting_room,
-                      size: 18,
-                      color: Colors.blue.shade700,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Meeting ID',
-                            style: TextStyle(
-                              color: Colors.blue.shade700,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
+            child: Column(
+              children: [
+                // Meeting ID Card with Copy Button
+                Container(
+                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.meeting_room,
+                        size: 18,
+                        color: Colors.blue.shade700,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Meeting ID',
+                              style: TextStyle(
+                                color: Colors.blue.shade700,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              widget.meetingId,
+                              style: TextStyle(
+                                color: Colors.blue.shade700,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Copy Button
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: InkWell(
+                          onTap: _copyMeetingIdToClipboard,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.copy,
+                                  size: 16,
+                                  color: Colors.blue.shade700,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Copy',
+                                  style: TextStyle(
+                                    color: Colors.blue.shade700,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Participants Grid
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: participants.isEmpty
+                        ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          const SizedBox(height: 16),
                           Text(
-                            widget.meetingId,
+                            'Waiting for participants to join...',
                             style: TextStyle(
-                              color: Colors.blue.shade700,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1,
+                              color: Colors.grey.shade600,
                               fontSize: 16,
                             ),
                           ),
                         ],
                       ),
-                    ),
-
-                    // Copy Button
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.blue.shade200),
+                    )
+                        : GridView.builder(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        mainAxisExtent: 260, // <-- Reduced height to give more space for controls
                       ),
-                      child: InkWell(
-                        onTap: _copyMeetingIdToClipboard,
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      itemBuilder: (context, index) {
+                        return ParticipantTile(
+                            key: Key(participants.values.elementAt(index).id),
+                            participant: participants.values.elementAt(index));
+                      },
+                      itemCount: participants.length,
+                    ),
+                  ),
+                ),
+
+                // Controls Section - Moved up with reduced bottom padding
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 10,
+                        offset: const Offset(0, -2),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + bottomPadding * 0.2), // <-- Reduced bottom padding
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Participant count indicator
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 8), // <-- Reduced margin
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.copy,
-                                size: 16,
-                                color: Colors.blue.shade700,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Copy',
-                                style: TextStyle(
-                                  color: Colors.blue.shade700,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 14,
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.people,
+                                      size: 14,
+                                      color: Colors.grey.shade700,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${participants.length} participant${participants.length != 1 ? 's' : ''}',
+                                      style: TextStyle(
+                                        color: Colors.grey.shade700,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
 
-              // Participants Grid
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: participants.isEmpty
-                      ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(
-                          color: Theme.of(context).primaryColor,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Waiting for participants to join...',
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                      : GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      mainAxisExtent: 280,
-                    ),
-                    itemBuilder: (context, index) {
-                      return ParticipantTile(
-                          key: Key(participants.values.elementAt(index).id),
-                          participant: participants.values.elementAt(index));
-                    },
-                    itemCount: participants.length,
-                  ),
-                ),
-              ),
-
-              // Elevated Controls Section
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      spreadRadius: 2,
-                      blurRadius: 10,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Participant count indicator
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.people,
-                                    size: 16,
-                                    color: Colors.grey.shade700,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    '${participants.length} participant${participants.length != 1 ? 's' : ''}',
-                                    style: TextStyle(
-                                      color: Colors.grey.shade700,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Meeting Controls with elevation - FIXED WITH setState()
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              spreadRadius: 1,
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: MeetingControls(
+                        // Meeting Controls
+                        MeetingControls(
                           onToggleMicButtonPressed: () {
                             setState(() {
                               if (micEnabled) {
@@ -371,17 +368,17 @@ class _MeetingScreenState extends State<MeetingScreen> {
                             });
                           },
                           onLeaveButtonPressed: () {
-                            _room.leave();
+                            _room.leave(); // This will trigger roomLeft and navigation
                           },
                           micEnabled: micEnabled,
                           camEnabled: camEnabled,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
