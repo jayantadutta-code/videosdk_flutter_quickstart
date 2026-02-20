@@ -57,11 +57,11 @@
     📸 Screenshots
     
     <div>
-    <img src="1.jpeg" alt="screenshot" width="200" />
-    <img src="2.jpeg" alt="screenshot" width="200" />
-    <img src="3.jpeg" alt="screenshot" width="200" />
-    <img src="4.jpeg" alt="screenshot" width="200" />
-    <img src="5.jpeg" alt="screenshot" width="200" />
+    <img src="assets/images/1.jpeg" alt="screenshot" width="200" />
+    <img src="assets/images/2.jpeg" alt="screenshot" width="200" />
+    <img src="assets/images/3.jpeg" alt="screenshot" width="200" />
+    <img src="assets/images/4.jpeg" alt="screenshot" width="200" />
+    <img src="assets/images/5.jpeg" alt="screenshot" width="200" />
     
     </div>
     
