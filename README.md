@@ -1,7 +1,9 @@
-    📹 Flutter Video Call App
+    📹 Nest
 
-    A real-time video calling application built with Flutter using the videosdk_flutter_quickstart package.
-    This project demonstrates how to integrate live audio and video communication with a simple and clean UI.
+    Nest is a modern communication application built with Flutter that enables seamless video 
+    meetings and real-time collaboration. It provides a clean, intuitive interface for users 
+    to connect via video calls with features like mic/camera controls, participant management, 
+    and easy meeting ID sharing.
 
     🚀 Features
 
@@ -9,7 +11,7 @@
 
     🎥 Enable / Disable Camera
 
-    [🎤 Mute / Unmute Microphone
+    🎤 Mute / Unmute Microphone
     
     👥 View participants in real-time
     
@@ -54,7 +56,14 @@
     
     📸 Screenshots
     
-    (Add your app screenshots here)
+    <div>
+    <img src="1.jpeg" alt="screenshot" width="200" />
+    <img src="2.jpeg" alt="screenshot" width="200" />
+    <img src="3.jpeg" alt="screenshot" width="200" />
+    <img src="4.jpeg" alt="screenshot" width="200" />
+    <img src="5.jpeg" alt="screenshot" width="200" />
+    
+    </div>
     
     📌 Package Used
     
