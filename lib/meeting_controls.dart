@@ -22,37 +22,29 @@ class MeetingControls extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // Mic Button
           _buildControlButton(
             icon: micEnabled ? Icons.mic : Icons.mic_off,
             label: micEnabled ? 'Mute' : 'Unmute',
             color: micEnabled ? Colors.blue : Colors.grey,
             onPressed: onToggleMicButtonPressed,
-            backgroundColor: micEnabled ? Colors.blue.shade50 : Colors.grey.shade100,
           ),
-
-          // Camera Button
           _buildControlButton(
             icon: camEnabled ? Icons.videocam : Icons.videocam_off,
             label: camEnabled ? 'Stop' : 'Start',
             color: camEnabled ? Colors.blue : Colors.grey,
             onPressed: onToggleCameraButtonPressed,
-            backgroundColor: camEnabled ? Colors.blue.shade50 : Colors.grey.shade100,
           ),
-
-          // Leave Button
           _buildControlButton(
             icon: Icons.call_end,
             label: 'Leave',
             color: Colors.red,
             onPressed: onLeaveButtonPressed,
-            backgroundColor: Colors.red.shade50,
           ),
         ],
       ),
@@ -64,7 +56,6 @@ class MeetingControls extends StatelessWidget {
     required String label,
     required Color color,
     required VoidCallback onPressed,
-    required Color backgroundColor,
   }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -80,25 +71,28 @@ class MeetingControls extends StatelessWidget {
               ),
             ],
           ),
-          child: ElevatedButton(
-            onPressed: onPressed,
-            style: ElevatedButton.styleFrom(
-              shape: const CircleBorder(),
-              padding: const EdgeInsets.all(16),
-              backgroundColor: backgroundColor,
-              foregroundColor: color,
-              elevation: 4,
-              shadowColor: color.withOpacity(0.3),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onPressed,
+              customBorder: const CircleBorder(),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: color.withOpacity(0.1),
+                ),
+                child: Icon(icon, size: 28, color: color),
+              ),
             ),
-            child: Icon(icon, size: 28),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         Text(
           label,
           style: TextStyle(
             color: color,
-            fontSize: 12,
+            fontSize: 10,
             fontWeight: FontWeight.w500,
           ),
         ),
