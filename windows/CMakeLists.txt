@@ -4,7 +4,7 @@ project(videosdk_flutter_quickstart LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "videosdk_flutter_quickstart")
+set(BINARY_NAME "Nest_Communiction")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
